@@ -13,7 +13,6 @@
 
 all : output/idenm.rds \
 	output/idmnm.rds \
-    output/nombres_estados.rds \
     output/nombres_municipios.rds \
     output/pob_estatal.rds \
     output/pob_municipal.rds
@@ -23,7 +22,6 @@ clean :
 
 all_outputs = output/idenm.rds \
 		output/idmnm.rds \
-        output/nombres_estados.rds \
         output/nombres_municipios.rds \
         output/pob_estatal.rds \
         output/pob_municipal.rds
