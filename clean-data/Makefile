@@ -25,7 +25,6 @@ all_outputs = output/clean-ide.rds \
 all_inputs = src/clean-sesnsp.R \
 		$(HERE)/import/output/idenm.rds \
 		$(HERE)/import/output/idmnm.rds \
- 		$(HERE)/import/output/nombres_municipios.rds \
         $(HERE)/import/output/pob_estatal.rds \
         $(HERE)/import/output/pob_municipal.rds
 
