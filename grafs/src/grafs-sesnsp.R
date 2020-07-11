@@ -22,7 +22,11 @@ files <- list(ide = here("clean-data/output/clean-ide.rds"),
               graf7 = here("grafs/output/7_dumbell-altoimpacto.svg"),
               graf8 = here("grafs/output/8_dumbell-robos.svg"),
               graf_dist1 = here("grafs/output/bars_dist1.svg"),
-              graf_dist2 = here("grafs/output/bars_dist2.svg"))
+              graf_dist1_2 = here("grafs/output/bars_dist1_2.svg"),
+              graf_dist2 = here("grafs/output/bars_dist2.svg"),
+              graf_dist2_2 = here("grafs/output/bars_dist2_2.svg"),
+              grafs_acumulados1 = here("grafs/output/fiebre_acum1.svg"),
+              grafs_acumulados2 = here("grafs/output/fiebre_acum2.svg"))
 
 tema <- theme_minimal() +
   theme(plot.title = element_text(size = 16, family = "Barlow Condensed", hjust = 0.5, face = "bold"),
@@ -282,10 +286,7 @@ ggsave(files$graf4, width = 14, height = 8)
 
 # Histogramas
 
-tempo <- filter(ide, year == 2019) %>% 
-  mutate(periodo = "2019") %>% 
-  bind_rows(ide, .) %>%
-  select(periodo, year:total_enero_mayo) %>% 
+tempo <- select(ide, periodo, year:total_enero_mayo) %>% 
   group_by(periodo, tipo_delito) %>% 
   summarise(across(starts_with("total_"), sum)) %>% 
   pivot_longer(total_enero:total_mayo, names_to = "mes", values_to = "total") %>% 
@@ -323,6 +324,27 @@ ggplot(plot_df, aes(x = mes , y = porcentaje, fill = periodo)) +
 
 ggsave(files$graf_dist1, width = 14, height = 8)
 
+ggplot() +
+  geom_bar(data = plot_df %>%  filter(periodo != "2020"), 
+           aes(x = mes, y = porcentaje, fill = periodo),
+           stat = "identity", width = 0.85, alpha = 0.5) +
+  geom_bar(data = plot_df %>%  filter(periodo == "2020"), 
+           aes(x = mes, y = porcentaje, fill = periodo),
+           stat = "identity", width = 0.65, alpha = 0.5) +
+  scale_fill_manual(values = c("#E49C23", "#0A8974", "#E3072A")) +
+  facet_rep_wrap(~tipo_delito, repeat.tick.labels = "bottom") +
+  scale_y_continuous(labels = percent_format()) +
+  labs(title = "Distribución mensual del total de carpetas de investigación",
+       subtitle = "Porcentajes mensuales sobre el total de carpetas abiertas hasta mayo",
+       x = "", y = "Porcentaje", 
+       caption = "Fuente: Elaboración propia con datos del SESNSP") +
+  tema +
+  theme(axis.title.y = element_text(margin = margin(0, 15, 0, 0)),
+        legend.title = element_blank(),
+        legend.position = "top")
+
+ggsave(files$graf_dist1_2, width = 14, height = 8)
+
 
 plot_df <- filter(tempo, str_detect(tipo_delito, "Homicidio|Feminicidio|Secuestro"))
 
@@ -346,6 +368,88 @@ ggplot(plot_df, aes(x = mes , y = porcentaje, fill = periodo)) +
         legend.title = element_blank())
 
 ggsave(files$graf_dist2, width = 14, height = 8)
+
+ggplot() +
+  geom_bar(data = plot_df %>%  filter(periodo != "2020"), 
+           aes(x = mes, y = porcentaje, fill = periodo),
+           stat = "identity", width = 0.85, alpha = 0.5) +
+  geom_bar(data = plot_df %>%  filter(periodo == "2020"), 
+           aes(x = mes, y = porcentaje, fill = periodo),
+           stat = "identity", width = 0.65, alpha = 0.5) +
+  scale_fill_manual(values = c("#E49C23", "#0A8974", "#E3072A")) +
+  facet_rep_wrap(~tipo_delito, repeat.tick.labels = "bottom") +
+  scale_y_continuous(labels = percent_format()) +
+  labs(title = "Distribución mensual del total de carpetas de investigación",
+       subtitle = "Porcentajes mensuales sobre el total de carpetas abiertas hasta mayo",
+       x = "", y = "Porcentaje", 
+       caption = "Fuente: Elaboración propia con datos del SESNSP") +
+  tema +
+  theme(axis.title.y = element_text(margin = margin(0, 15, 0, 0)),
+        legend.title = element_blank(),
+        legend.position = "top")
+
+ggsave(files$graf_dist2_2, width = 14, height = 8)
+
+# Porcentajes acumulados
+
+tempo <- select(ide, periodo, tipo_delito:total_enero_mayo) %>% 
+  group_by(periodo, tipo_delito) %>% 
+  summarise(across(starts_with("total_"), sum)) %>% 
+  pivot_longer(total_enero:total_mayo, names_to = "mes", values_to = "total") %>% 
+  mutate(mes = str_remove(mes, "total_"),
+         mes = str_to_title(mes),
+         porcentaje = round(total/total_enero_mayo, digits = 2),
+         mes = factor(mes, levels = c("Enero", "Febrero", "Marzo", "Abril", "Mayo"))) %>% 
+  relocate(total_enero_mayo, .before = porcentaje) %>% 
+  arrange(periodo) %>% 
+  group_by(periodo, tipo_delito) %>% 
+  mutate(porcentaje_acumulado = cumsum(porcentaje)) %>%
+  ungroup()
+
+plot_df <-   filter(tempo, str_detect(tipo_delito, "Robo"),
+                    str_detect(tipo_delito, "casa|transeúnte|transporte público")) %>% 
+  mutate(tipo_delito = str_remove(tipo_delito, "Robo"), 
+         tipo_delito = str_to_sentence(tipo_delito)) 
+
+ggplot(plot_df, aes(x = mes, y = porcentaje_acumulado, 
+                    color = periodo, group = periodo)) +
+  geom_line() +
+  geom_point() +
+  facet_rep_wrap(~tipo_delito, repeat.tick.labels = "bottom") +
+  scale_y_continuous(labels = percent_format(accuracy = 5L),
+                     breaks = seq(0, 1 , 0.2)) +
+  scale_color_manual(values = c("#E49C23", "#0A8974", "#E3072A")) +
+  labs(title = "Porcentaje acumulado de carpetas de investigación agregado por mes", 
+       subtitle = "Porcentajes por tipo de delito",
+       y = "Porcentaje acumulado",
+       x = "",
+       caption = "Fuente: Elaboración propia con datos del SESNSP") +
+  tema +
+  theme(legend.title = element_blank(),
+        legend.position = "top")
+
+ggsave(files$grafs_acumulados1, width = 14, height = 8)
+
+plot_df <- filter(tempo, str_detect(tipo_delito, "Homicidio|Feminicidio|Secuestro"))
+
+ggplot(plot_df, aes(x = mes, y = porcentaje_acumulado, 
+                    color = periodo, group = periodo)) +
+  geom_line() +
+  geom_point() +
+  facet_rep_wrap(~tipo_delito, repeat.tick.labels = "bottom") +
+  scale_y_continuous(labels = percent_format(accuracy = 5L),
+                     breaks = seq(0, 1 , 0.2)) +
+  scale_color_manual(values = c("#E49C23", "#0A8974", "#E3072A")) +
+  labs(title = "Porcentaje acumulado de carpetas de investigación agregado por mes", 
+       subtitle = "Porcentajes por tipo de delito",
+       y = "Porcentaje acumulado",
+       x = "",
+       caption = "Fuente: Elaboración propia con datos del SESNSP") +
+  tema +
+  theme(legend.title = element_blank(),
+        legend.position = "top")
+
+ggsave(files$grafs_acumulados2, width = 14, height = 8)
 
 # Scatters estatales
 
@@ -454,10 +558,45 @@ tempo <- select(ide, year, cve_ent, nom_ent, tipo_delito,
   abreviar() %>% 
   arrange(tipo_delito, -diferencia) %>% 
   group_by(tipo_delito) %>% 
-  mutate(rank = rank(-diferencia)) %>% 
+  mutate(rank = row_number()) %>% 
   ungroup()
 
 plot_df <- filter(tempo, str_detect(tipo_delito, "Homicidio|Feminicidio|Secuestro"))
+
+ggplot(plot_df) +
+  geom_segment(aes(y = tasa_2015_2019, yend = tasa_2020, 
+                   x = reorder(abrev, desc(-rank)),
+                   xend = reorder(abrev, desc(-rank)),
+                   color = diferencia_grupo), 
+               linetype = "solid", size = 2) + 
+  geom_point(aes(y = tasa_2015_2019, x = abrev), size = 2,
+             color = "purple" ) +
+  geom_point(aes(y = tasa_2020, x = abrev), size = 2,
+             color = "#E49C23" ) +
+  facet_wrap(~tipo_delito, scales = "free", nrow = 2) +
+  coord_flip() +
+  labs(y = "", x = "", color = "") +
+  tema +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+ggplot(plot_df) +
+  geom_segment(aes(x = tasa_2015_2019, xend = tasa_2020, 
+                   y = rank,
+                   yend = rank ,
+                   color = diferencia_grupo), 
+               linetype = "solid", size = 2) + 
+  geom_point(aes(x = tasa_2015_2019, y = rank), size = 2,
+             color = "purple" ) +
+  geom_point(aes(x = tasa_2020, y = rank), size = 2,
+             color = "#E49C23" ) +
+  geom_text(data = plot_df %>% filter(diferencia_grupo != "Disminución"), 
+            aes(x = tasa_2020, y = rank, label = abrev),
+            family = "Barlow Condensed", hjust = -1, size = 3.5) +
+  facet_wrap(~tipo_delito, scales = "free", nrow = 1) +
+  labs(y = "", x = "", color = "") +
+  tema +
+  theme(axis.text.x = element_text(angle = 90))
 
 plot_fun <- function(delito) {
   ggplot(plot_df %>%  filter(str_detect(tipo_delito, delito))) +

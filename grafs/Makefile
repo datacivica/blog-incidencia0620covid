@@ -21,6 +21,11 @@ all: output/1_fiebres-robos.svg \
         output/7_dumbell-altoimpacto.svg \
         output/8_dumbell-robos.svg \
        	output/bars_dist1.svg \
+        output/bars_dist1_2.svg \
+        output/bars_dist2.svg \
+        output/bars_dist2_2.svg \
+        output/fiebre_acum1.svg \
+        output/fiebre_acum2.svg \
         output/bars_dist2.svg
 
 clean: 
@@ -35,6 +40,11 @@ outputs_grafs = output/1_fiebres-robos.svg \
         output/7_dumbell-altoimpacto.svg \
         output/8_dumbell-robos.svg \
        	output/bars_dist1.svg \
+        output/bars_dist1_2.svg \
+        output/bars_dist2.svg \
+        output/bars_dist2_2.svg \
+        output/fiebre_acum1.svg \
+        output/fiebre_acum2.svg \
         output/bars_dist2.svg
 
 inputs_grafs = src/grafs-sesnsp.R \
