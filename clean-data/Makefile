@@ -13,20 +13,10 @@ HERE := $(shell git rev-parse --show-toplevel)
 
 .PHONY : all clean
 
-all : output/clean-ide.rds \
-	output/clean-idm.rds
+all : output/clean-ide.rds 
 
-clean :
-	 rm output/*
+clean :	rm output/*
 
-all_outputs = output/clean-ide.rds \
-	output/clean-idm.rds
-		
-all_inputs = src/clean-sesnsp.R \
-		$(HERE)/import/output/idenm.rds \
-		$(HERE)/import/output/idmnm.rds \
-        $(HERE)/import/output/pob_estatal.rds \
-        $(HERE)/import/output/pob_municipal.rds
-
-$(all_outputs) : $(all_inputs) 
+output/clean-ide.rds: \
+		src/clean-sesnsp.R
 	Rscript --vanilla $<

@@ -12,26 +12,15 @@
 .PHONY : all clean
 
 all : output/idenm.rds \
-	output/idmnm.rds \
-    output/nombres_municipios.rds \
-    output/pob_estatal.rds \
-    output/pob_municipal.rds
+    output/pob_estatal.rds 
 
 clean :
 	 rm output/*
 
 all_outputs = output/idenm.rds \
-		output/idmnm.rds \
-        output/nombres_municipios.rds \
         output/pob_estatal.rds \
-        output/pob_municipal.rds
 		
-all_inputs = src/import-everything.R \
-		input/IDEFC_NM_may2020.csv  \
-		input/IDM_NM_may2020.csv \
-        input/nombres_municipios.xlsx \
-        input/pob_mit_proyecciones.csv.gz \
-        input/municipios_sexo_15-30.csv.gz
+all_inputs = src/import-everything.R 
 
 $(all_outputs) : $(all_inputs) 
 	Rscript --vanilla $<
