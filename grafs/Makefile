@@ -12,22 +12,22 @@ HERE := $(shell git rev-parse --show-toplevel)
 
 .PHONY: all clean
 
-all: output/1_fiebres-robos.svg \
-		output/2_fiebres-alto.svg \
-		output/5_dif-homicidios.svg \
-		output/5_dif-feminicidios.svg \
-		output/6_tasa_acum1.svg \
-	 	output/6_tasa_acum2.svg
+all: output/1_fiebres-robos.jpg \
+		output/2_fiebres-alto.jpg \
+		output/5_dif-homicidios.jpg \
+		output/5_dif-feminicidios.jpg \
+		output/6_tasa_acum1.jpg \
+	 	output/6_tasa_acum2.jpg
 
 clean: 
 	rm output/*
 
-outputs_grafs =  output/1_fiebres-robos.svg \
-		output/2_fiebres-alto.svg \
-  		output/5_dif-homicidios.svg \
-        output/5_dif-feminicidios.svg \
-		output/6_tasa_acum1.svg \
-	 	output/6_tasa_acum2.svg
+outputs_grafs =  output/1_fiebres-robos.jpg \
+		output/2_fiebres-alto.jpg \
+  		output/5_dif-homicidios.jpg \
+        output/5_dif-feminicidios.jpg \
+		output/6_tasa_acum1.jpg \
+	 	output/6_tasa_acum2.jpg
 
 
 inputs_grafs = src/grafs-sesnsp.R 

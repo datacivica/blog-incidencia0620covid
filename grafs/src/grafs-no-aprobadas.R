@@ -14,7 +14,8 @@ loadfonts(quiet = T)
 
 #--- Gráficas that didn't make the cut ---#
 
-files <- list(scatter_v1 = here("grafs/output/6_scatter-variaciones.svg"),
+files <- list(ide = here("clean-data/output/clean-ide.rds"),
+              scatter_v1 = here("grafs/output/6_scatter-variaciones.svg"),
               scatter_v2 = here("grafs/output/7_scatter-variaciones.svg"),
               graf_distm1 = here("grafs/output/3_distribucion-mensual.svg"),
               graf_distm2 = here("grafs/output/4_distribucion-mensual.svg"),

@@ -7,18 +7,22 @@
 #
 
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(tidyverse, here, extrafont, scales, ggridges,
-               ggpubr, ggrepel, lemon, viridis, janitor)
+p_load(tidyverse, here, extrafont, scales, grid, magick, 
+       add2ggplot, ggpubr, ggrepel, lemon, viridis, janitor)
 
 loadfonts(quiet = T)
 
+# Archivero
 files <- list(ide = here("clean-data/output/clean-ide.rds"),
-              graf1 = here("grafs/output/1_fiebres-robos.svg"),
-              graf2 = here("grafs/output/2_fiebres-alto.svg"),
-              dif_homicidios = here("grafs/output/5_dif-homicidios.svg"),
-              dif_feminicidios = here("grafs/output/5_dif-feminicidios.svg"),
-              tasa_acum1 = here("grafs/output/6_tasa_acum1.svg"),
-              tasa_acum2 = here("grafs/output/6_tasa_acum2.svg"))
+              logo = here("grafs/input/logo-dc.png"),
+              graf1 = here("grafs/output/1_fiebres-robos.jpg"),
+              graf2 = here("grafs/output/2_fiebres-alto.jpg"),
+              dif_homicidios = here("grafs/output/5_dif-homicidios.jpg"),
+              dif_feminicidios = here("grafs/output/5_dif-feminicidios.jpg"),
+              tasa_acum1 = here("grafs/output/6_tasa_acum1.jpg"),
+              tasa_acum2 = here("grafs/output/6_tasa_acum2.jpg"))
+
+# Tema gráfico y logo
 
 tema <- theme_minimal() +
   theme(plot.title = element_text(size = 22, family = "Barlow Condensed", hjust = 0.5, face = "bold"),
@@ -30,6 +34,17 @@ tema <- theme_minimal() +
         legend.text = element_text(size = 13, family = "Barlow Condensed", hjust = 0.5),
         strip.text = element_text(size = 14, face = "bold", family = "Barlow Condensed"))
 
+# Función para agregar logos
+
+add_dclogo <- function(graf, escala){
+  graf_con_logo <- add_logo(
+    plot_path = graf,
+    logo_path = files$logo,
+    logo_position = "bottom right",
+    logo_scale = escala)
+  
+   magick::image_write(graf_con_logo, graf)
+}
 
 # Abrimos bases
 
@@ -118,9 +133,9 @@ plot_fun <- function(periodos, delitos, colores, titulo, subtitulo, plotrows) {
   ggplot(plot_df, aes(x = mes, y = mean_tasa, color = periodo, group = periodo)) +
     geom_ribbon(data = plot_df %>% filter(periodo == "Promedio\n2015-2018"),
                 aes(ymin = mean_tasa - sd_tasa, 
-                    ymax = mean_tasa + sd_tasa, x = mes), fill = "#9a9aff",
-                color = "#9a9aff",
-                alpha = 0.4, size = 0.5, show.legend = F) +
+                    ymax = mean_tasa + sd_tasa, x = mes), fill = "#0A8974",
+                color = NA,
+                alpha = 0.2, size = 0.5, show.legend = F) +
     geom_line(alpha = 0.8, size = 1) +
     geom_point(size = 1.25, alpha = 0.6) +
     scale_color_manual(values = colores) +
@@ -136,9 +151,9 @@ plot_fun <- function(periodos, delitos, colores, titulo, subtitulo, plotrows) {
 plot_fun(periodos = "2015-2018|2019|2020", delitos = "Robo", plotrows = 3,
          colores = c("#0A8974", "#E49C23","#E3072A"),
          titulo = "Tasa nacional de carpetas de investigación por robo",
-         subtitulo = "Tasas mensuales por tipo de robo")
+         subtitulo = "Tasas mensuales por tipo de robo") 
 ggsave(files$graf1, width = 14, height = 8)
-
+add_dclogo(graf = files$graf1, escala = 7)
 
 plot_fun(periodos = "2015-2018|2019|2020",  delitos = "Homicidio|Feminicidio", 
          plotrows = 1,
@@ -148,7 +163,9 @@ plot_fun(periodos = "2015-2018|2019|2020",  delitos = "Homicidio|Feminicidio",
   geom_line(alpha = 0.8, size = 1.5) +
   geom_point(size = 2.2, alpha = 0.6) +
   labs(caption = "Fuente: Elaboración propia con datos del SESNSP\n(tasa de feminicidios calculada con población total de mujeres)") 
+
 ggsave(files$graf2, width = 14, height = 8)
+add_dclogo(graf = files$graf2, escala = 9)
 
 # Cambios por entidad
 
@@ -211,7 +228,8 @@ g2 <- ggplot(plot_df, aes(x = "Diferencia 2019 vs 2020", y = fct_rev(abrev), fil
 
 graf <- egg::ggarrange(g1, g2, ncol = 2, widths = c(55,17))
 
-ggsave(files$dif_homicidios, graf, width = 14, height = 8)
+ggsave(files$dif_homicidios, graf, width = 16, height = 8)
+add_dclogo(graf = files$dif_homicidios, escala = 10)
 
 plot_df <- filter(tempo, str_detect(tipo_delito, "Feminicidio")) %>%  
   mutate(abrev = fct_reorder(abrev, -diferencia))
@@ -250,7 +268,8 @@ g2 <- ggplot(plot_df, aes(x = "Diferencia 2019 vs 2020",
 
 graf <- egg::ggarrange(g1, g2, ncol = 2, widths = c(55,17))
 
-ggsave(files$dif_feminicidios, graf, width = 14, height = 8)
+ggsave(files$dif_feminicidios, graf, width = 16, height = 8)
+add_dclogo(graf = files$dif_feminicidios, escala = 10)
 
 rm(g1, g2, graf)
 
@@ -306,6 +325,7 @@ plot_fun(periodos = "2015-2018|2019|2020", delitos = "Robo", plotrows = 3,
          subtitulo = "Tasas con totales acumulados por mes y tipo de delito")
 
 ggsave(files$tasa_acum1, width = 14, height = 8)
+add_dclogo(graf = files$tasa_acum1, escala = 9)
 
 plot_fun(periodos = "2015-2018|2019|2020", delitos = "Homicidio|Feminicidio", 
          plotrows = 1, colores = c("#0A8974", "#E49C23","#E3072A"),
@@ -313,5 +333,8 @@ plot_fun(periodos = "2015-2018|2019|2020", delitos = "Homicidio|Feminicidio",
          subtitulo = "Tasas con totales acumulados por mes y tipo de delito")
 
 ggsave(files$tasa_acum2, width = 14, height = 8)
+add_dclogo(graf = files$tasa_acum2, escala = 10)
+
+
 
 
