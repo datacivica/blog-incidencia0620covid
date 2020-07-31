@@ -187,7 +187,7 @@ g1 <- ggplot(plot_df, aes(x = periodo, y = fct_rev(abrev), fill = tasa_enero_jun
   scale_fill_gradientn(colours = c("white", "#E49C23", "#E3072A"), 
                        values = rescale(c(10,20,40))) +
   labs(title = "Diferencia en homicidios: tasa promedio 2015-2018 vs 2019 vs 2020",
-       subtitle = "Tasa de carpetas de investigación abiertas entre enero y junio",
+       subtitle = "Tasas de investigaciones con totales acumulados entre enero y junio",
        x = "", y = "", caption = "Fuente: Elaboración propia con datos del SESNSP") +
   coord_equal(ratio = 0.15) +
   guides(fill = F) +
@@ -223,7 +223,7 @@ g1 <- ggplot(plot_df, aes(x = periodo, y = fct_rev(abrev), fill = tasa_enero_jun
   scale_fill_gradientn(colours = c("white", "#E49C23", "#E3072A"), 
                        values = rescale(c(10,20,40))) +
   labs(title = "Diferencia en feminicidios: tasa promedio 2015-2018 vs 2019 vs 2020",
-       subtitle = "Tasa de carpetas de investigación abiertas entre enero y junio",
+       subtitle = "Tasas de investigaciones con totales acumulados entre enero y junio",
        x = "", y = "", caption = "Fuente: Elaboración propia con datos del SESNSP\n(tasa de feminicidios calculada con población total de mujeres)") +
   coord_equal(ratio = 0.15) +
   guides(fill = F) +
