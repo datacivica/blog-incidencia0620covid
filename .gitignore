@@ -27,3 +27,6 @@ Icon\r\r
 
 # Local History for Visual Studio Code
 .history/
+
+# Unused local scripts
+grafs-no-aprobadas.R
