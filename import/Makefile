@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Author: Adrián Lara
-# Maintainer(s): Adrián Lara
+# Maintainer(s): Adrián Lara, OE
 # License: (c) Data Cívica 2020
 #
 # -----------------------------------------------------------
@@ -12,15 +12,15 @@
 .PHONY : all clean
 
 all : output/idenm.rds \
-    output/pob_estatal.rds 
+    output/pob-estatal.rds 
 
 clean :
 	 rm output/*
 
-all_outputs = output/idenm.rds \
-        output/pob_estatal.rds \
-		
-all_inputs = src/import-everything.R 
+all_outputs = 
 
-$(all_outputs) : $(all_inputs) 
+output/idenm.rds output/pob-estatal.rds: \
+		src/import.R
 	Rscript --vanilla $<
+				
+# done.

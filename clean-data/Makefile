@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Author: Adrián Lara
-# Maintainer(s): Adrián Lara
+# Maintainer(s): Adrián Lara, OE
 # License: (c) Data Cívica 2020
 #
 # -----------------------------------------------------------
@@ -13,10 +13,12 @@ HERE := $(shell git rev-parse --show-toplevel)
 
 .PHONY : all clean
 
-all : output/clean-ide.rds 
+all : output/ide.rds 
 
 clean :	rm output/*
 
-output/clean-ide.rds: \
-		src/clean-sesnsp.R
+output/ide.rds: \
+		src/clean.R
 	Rscript --vanilla $<
+
+# done.

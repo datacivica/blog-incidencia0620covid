@@ -1,9 +1,10 @@
+#
 # Author: Adrián Lara
-# Maintainer(s): Adrián Lara
+# Maintainer(s): Adrián Lara, OE
 #
 # Copyright:   2020, Data Cívica, GPL v2 or later
 # =====================================================
-# blog-incidencia0620covid/grafs/src/grafs-sesnsp.R
+# blog-incidencia0620covid/grafs/src/grafs.R
 #
 
 if(!require(pacman)) install.packages("pacman")
@@ -13,14 +14,15 @@ p_load(tidyverse, here, extrafont, scales, grid, magick,
 loadfonts(quiet = T)
 
 # Archivero
-files <- list(ide = here("clean-data/output/clean-ide.rds"),
-              logo = here("grafs/input/logo-dc.png"),
-              graf1 = here("grafs/output/1_fiebres-robos.jpg"),
-              graf2 = here("grafs/output/2_fiebres-alto.jpg"),
-              dif_homicidios = here("grafs/output/5_dif-homicidios.jpg"),
-              dif_feminicidios = here("grafs/output/5_dif-feminicidios.jpg"),
-              tasa_acum1 = here("grafs/output/6_tasa_acum1.jpg"),
-              tasa_acum2 = here("grafs/output/6_tasa_acum2.jpg"))
+files <- list(ide = here("clean-data/output/ide.rds"),
+              logo = here("grafs/share/logo-dc.png"),
+              graf1 = here("grafs/output/fiebres-robos.jpg"),
+              graf2 = here("grafs/output/fiebres-alto.jpg"),
+              dif_homicidios = here("grafs/output/dif-homicidios.jpg"),
+              dif_feminicidios = here("grafs/output/dif-feminicidios.jpg"),
+              tasa_acum1 = here("grafs/output/tasa_acum1.jpg"),
+              tasa_acum2 = here("grafs/output/tasa_acum2.jpg")
+              )
 
 # Tema gráfico y logo
 
@@ -49,13 +51,11 @@ add_dclogo <- function(graf, escala){
 # Abrimos bases
 
 ide <- readRDS(files$ide) %>% 
-  mutate(periodo = case_when(
-    year >= 2015 & year <= 2018 ~ "2015-2018",
-    year == 2019 ~ "2019",
-    year == 2020 ~ "2020"),
-    tipo_delito = case_when(
-      str_detect(tipo_delito, "Robo a transeúnte en espacio") ~
-        "Robo a transeúnte en espacio abierto", T ~ tipo_delito))
+  mutate(periodo = case_when(year >= 2015 & year <= 2018 ~ "2015-2018",
+                             year == 2019 ~ "2019",
+                             year == 2020 ~ "2020"),
+         tipo_delito = case_when(str_detect(tipo_delito, "Robo a transeúnte en espacio") ~ "Robo a transeúnte en espacio abierto", 
+                                 T ~ tipo_delito))
 
 
 # Función para cambiar nombres
@@ -99,13 +99,12 @@ abreviar <- function(x) {
 # Graficamos
 
 # Fiebres
-
 tempo <- group_by(ide, year, periodo, tipo_delito, pob_nacional, pob_nacional_muj) %>% 
   summarise(across(starts_with("total"), sum, na.rm = T)) %>% 
   ungroup() %>% 
-  mutate_at(vars(starts_with("total")), list(~case_when(
-    tipo_delito == "Feminicidio" ~ round(./ pob_nacional_muj * 100000, digits = 2),
-    tipo_delito != "Feminicidio" ~ round(./ pob_nacional * 100000, digits = 2)))) %>% 
+  mutate_at(vars(starts_with("total")),
+            list(~case_when(tipo_delito == "Feminicidio" ~ round(./ pob_nacional_muj * 100000, digits = 2),
+                            tipo_delito != "Feminicidio" ~ round(./ pob_nacional * 100000, digits = 2)))) %>% 
   rename_at(vars(total_enero:total_anual), 
             function(x) str_replace(x, "total", "tasa")) %>% 
   pivot_longer(tasa_enero:tasa_junio, names_to = "mes", values_to = "tasa") %>% 
@@ -116,11 +115,10 @@ tempo <- group_by(ide, year, periodo, tipo_delito, pob_nacional, pob_nacional_mu
   ungroup() %>% 
   mutate(mes = str_remove(mes, "tasa_"), 
          mes = str_to_title(mes),
-         mes = factor(mes, levels = c("Enero", "Febrero", "Marzo", "Abril", 
-                                      "Mayo", "Junio")),
+         mes = factor(mes, levels = c("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio")),
          periodo = str_replace(periodo, "2015-2018", "Promedio\n2015-2018"),
-         periodo = factor(periodo, levels = c("Promedio\n2015-2018", "2019",
-                                              "2020")))
+         periodo = factor(periodo, levels = c("Promedio\n2015-2018", "2019", "2020")))
+
 
 plot_fun <- function(periodos, delitos, colores, titulo, subtitulo, plotrows) {
   
@@ -168,19 +166,14 @@ ggsave(files$graf2, width = 14, height = 8)
 add_dclogo(graf = files$graf2, escala = 9)
 
 # Cambios por entidad
-
 tempo <- select(ide, periodo, year, cve_ent, nom_ent, tipo_delito, 
                 pob_tot, pob_muj, total_enero_junio) %>%
-  mutate(tasa_enero_junio = case_when(
-    tipo_delito == "Feminicidio" ~ 
-      round(total_enero_junio/ pob_muj * 100000, digits = 2),
-    tipo_delito != "Feminicidio" ~ 
-      round(total_enero_junio/ pob_tot * 100000, digits = 2))) %>% 
+  mutate(tasa_enero_junio = case_when(tipo_delito == "Feminicidio" ~ round(total_enero_junio/ pob_muj * 100000, digits = 2),
+                                      tipo_delito != "Feminicidio" ~ round(total_enero_junio/ pob_tot * 100000, digits = 2))) %>% 
   group_by(periodo, cve_ent, nom_ent, tipo_delito) %>% 
   summarise(tasa_enero_junio = round(mean(tasa_enero_junio), digits = 2)) %>% 
   ungroup() %>% 
-  pivot_wider(names_from = periodo, values_from = tasa_enero_junio, 
-              names_prefix = "x_") %>%
+  pivot_wider(names_from = periodo, values_from = tasa_enero_junio, names_prefix = "x_") %>%
   clean_names() %>% 
   mutate(diferencia = round(x_2020 * 100 / x_2019 - 100, digits = 2),
          diferencia2 = round(x_2020 * 100 / x_2015_2018 - 100, digits = 2))%>% 
@@ -199,8 +192,7 @@ plot_df <- filter(tempo, str_detect(tipo_delito, "Homicidio")) %>%
 
 g1 <- ggplot(plot_df, aes(x = periodo, y = fct_rev(abrev), fill = tasa_enero_junio)) +
   geom_tile(colour = "white") +
-  geom_text(aes(label = tasa_enero_junio), family = "Barlow Condensed",
-            size = 6) +
+  geom_text(aes(label = tasa_enero_junio), family = "Barlow Condensed", size = 6) +
   scale_fill_gradientn(colours = c("white", "#E49C23", "#E3072A"), 
                        values = rescale(c(10,20,40))) +
   labs(title = "Diferencia en homicidios: tasa promedio 2015-2018 vs 2019 vs 2020",
@@ -335,6 +327,4 @@ plot_fun(periodos = "2015-2018|2019|2020", delitos = "Homicidio|Feminicidio",
 ggsave(files$tasa_acum2, width = 14, height = 8)
 add_dclogo(graf = files$tasa_acum2, escala = 10)
 
-
-
-
+# done.
