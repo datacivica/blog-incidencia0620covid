@@ -14,24 +14,21 @@ HERE := $(shell git rev-parse --show-toplevel)
 
 all: output/1_fiebres-robos.svg \
 		output/2_fiebres-alto.svg \
-		output/3_distribucion-mensual.svg \
-		output/4_distribucion-mensual.svg \
 		output/5_dif-homicidios.svg \
 		output/5_dif-feminicidios.svg \
-		output/6_scatter-variaciones.svg \
-	 	output/7_scatter-variaciones.svg
-	
+		output/6_tasa_acum1.svg \
+	 	output/6_tasa_acum2.svg
+
 clean: 
 	rm output/*
 
 outputs_grafs =  output/1_fiebres-robos.svg \
 		output/2_fiebres-alto.svg \
-		output/3_distribucion-mensual.svg \
-		output/4_distribucion-mensual.svg \
   		output/5_dif-homicidios.svg \
         output/5_dif-feminicidios.svg \
-        output/6_scatter-variaciones.svg \
-        output/7_scatter-variaciones.svg
+		output/6_tasa_acum1.svg \
+	 	output/6_tasa_acum2.svg
+
 
 inputs_grafs = src/grafs-sesnsp.R 
 	
